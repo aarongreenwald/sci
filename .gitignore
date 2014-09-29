@@ -1,3 +1,6 @@
+#scripts directory for the build scripts
+/scripts/
+
 # Logs
 logs
 *.log

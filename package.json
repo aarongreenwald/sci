@@ -1,0 +1,24 @@
+{
+  "name": "sci",
+  "version": "0.0.1",
+  "description": "Simple continuous integration tool - listens for HTTP posts from services like github and runs builds/deploys",
+  "main": "sci.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aarongreenwald/sci.git"
+  },
+  "keywords": [
+    "Continuous Integration",
+    "CI",
+    "build tool",
+    "github"
+  ],
+  "author": "Aaron Greenwald",
+  "license": "MIT License",
+  "bugs": {
+    "url": "https://github.com/aarongreenwald/sci/issues"
+  }
+}
