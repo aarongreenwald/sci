@@ -3,7 +3,8 @@ var http = require("http")
 var spawn = require('child_process').spawn
 
 //repositories.json is a json formatted array of objects of form:
-//{ "name" : "aarongreenwald/sci", "scriptDirectory" : "some/relative/or/absolute/path", "script": "scriptName.sh"}    
+//{ "name" : "aarongreenwald/sci", "scriptDirectory" : "some/relative/or/absolute/path", "script": "scriptName.sh"}
+//testing sci continuous integration process    
 var repositories = JSON.parse(fs.readFileSync('repositories.json', 'utf8'));
 
 var handleError = function(ex, response){
