@@ -1,9 +1,10 @@
+var fs = require('fs')
 var http = require("http")
 var spawn = require('child_process').spawn
 
-var repositories = [
-    {name: 'aarongreenwald/grouper', scriptDirectory: 'scripts/', script: 'grouper.sh'}
-]
+//repositories.json is a json formatted array of objects of form:
+//{ "name" : "aarongreenwald/sci", "scriptDirectory" : "some/relative/or/absolute/path", "script": "scriptName.sh"}    
+var repositories = JSON.parse(fs.readFileSync('repositories.json', 'utf8'));
 
 var handleError = function(ex, response){
     response.write(ex.message ? ex.message : 'An uknown error occurred')
