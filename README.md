@@ -7,7 +7,8 @@ Configuration
 ---------------
 You'll need a settings.json file that looks something like this: 
 
-```{
+```
+{
     "verboseResponses" : "true",
     "secretKey" : "sha1=somelonghashstringthatrepresentsyoursecretkey", 
     "repositories": [
@@ -30,5 +31,5 @@ The `port` and `verboseResponses` settings are optional, they'll default to `312
 
 TODO
 --------------
-*Add support for other sources, such as bitbucket.
-*Add support for rolling builds (so that only one build per repository is running at a time)
+* Add support for other sources, such as bitbucket.
+* Add support for rolling builds (so that only one build per repository is running at a time)
