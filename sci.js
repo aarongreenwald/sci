@@ -1,5 +1,6 @@
 var fs = require('fs')
 var http = require("http")
+var https = require("https")
 var spawn = require('child_process').spawn
 
 var log = function(message){
@@ -13,6 +14,8 @@ var log = function(message){
 {
     "verboseResponses" : "true",
     "secretKey" : "sha1=somelonghashstringthatrepresentsyoursecretkey", 
+	"ssl" : "true",
+	"sslOptions" : {},
     "repositories": [
         {   
             "name": "aarongreenwald/grouper", 
@@ -45,10 +48,7 @@ catch (ex){
 var repositories = settings.repositories
 var port = settings.port || 31242
 
-
-log('Listening for POST requests on port ' + port + '...')
-
-http.createServer(function(request, response) {  
+var requestListener = function(request, response) {  
     
     var handleError = function(ex, response){
         response.writeHead(500, {"Content-Type": "text/plain"})
@@ -73,7 +73,7 @@ http.createServer(function(request, response) {
                 throw 'This request does not appear to originate from github. If you\'re going to try to break the system, at least try harder.'            
             }
                         
-            if (request.headers['x-hub-signature'] !== settings.secretKey){
+            if (request.headers['x-hub-signature'] && request.headers['x-hub-signature'] !== settings.secretKey){
                 throw 'You don\'t seem to be who you say you are. You need the key to enter!!'
             }
             
@@ -121,5 +121,13 @@ http.createServer(function(request, response) {
         finally {                    
             response.end()
         }                                                          
-    })                            
-}).listen(port);
+    })            
+}
+
+log('Listening for POST requests on port ' + port + '...')
+
+if (!settings.ssl){
+	http.createServer(requestListener).listen(port)
+} else {	
+	https.createServer(settings.sslOptions || { }, requestListener).listen(port)
+}
