@@ -3,11 +3,12 @@ var http = require("http")
 var https = require("https")
 var spawn = require('child_process').spawn
 
-var log = function(message){
+var log = function(message){	
+    console.log('---------', new Date(), '---------')
     console.log(message)
-    //TODO write to a log file, add datetime and other info
+    console.log()
+    //TODO write to a log file
 }
-
 
 /*
  * settings.json looks something like this: 
