@@ -2,6 +2,7 @@ var fs = require('fs')
 var http = require("http")
 var https = require("https")
 var spawn = require('child_process').spawn
+var path = require('path')
 
 var log = function(message){	
     console.log('---------', new Date(), '---------')
@@ -39,7 +40,7 @@ var log = function(message){
 log('sci server starting...')
 
 try {
-    var settings = JSON.parse(fs.readFileSync(__dirname + '/settings.json', 'utf8'))
+    var settings = JSON.parse(fs.readFileSync(path.join(__dirname, 'settings.json')))
 } 
 catch (ex){
     log('Cannot parse settings file: ' + ex)
