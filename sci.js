@@ -39,7 +39,7 @@ var log = function(message){
 log('sci server starting...')
 
 try {
-    var settings = JSON.parse(fs.readFileSync('sci/settings.json', 'utf8'))
+    var settings = JSON.parse(fs.readFileSync(__dirname + '/settings.json', 'utf8'))
 } 
 catch (ex){
     log('Cannot parse settings file: ' + ex)
