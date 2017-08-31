@@ -3,6 +3,7 @@ var http = require("http")
 var https = require("https")
 var spawn = require('child_process').spawn
 var path = require('path')
+var crypto = require('crypto')
 
 var log = function(message){	
     console.log('---------', new Date(), '---------')
@@ -64,7 +65,7 @@ var requestListener = function(request, response) {
     }
 
               
-    var body = ' '                                
+    var body = ''                                
     request.on('data', function (data) {
         body += data                                                  
     })
@@ -75,7 +76,10 @@ var requestListener = function(request, response) {
                 throw 'This request does not appear to originate from github. If you\'re going to try to break the system, at least try harder.'            
             }
                         
-            if (request.headers['x-hub-signature'] && request.headers['x-hub-signature'] !== settings.secretKey){
+	    const key = 'sha1=' + crypto.createHmac('sha1', settings.secretKey).update(body).digest('hex')
+	    const suppliedKey = request.headers['x-hub-signature']
+
+            if (suppliedKey !== key){
                 throw 'You don\'t seem to be who you say you are. You need the key to enter!!'
             }
             
