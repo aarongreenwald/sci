@@ -41,7 +41,7 @@ var log = function(message){
 log('sci server starting...')
 
 try {
-    var settings = JSON.parse(fs.readFileSync(path.join(__dirname, 'settings.json')))
+    var settings = JSON.parse(fs.readFileSync(path.join(__dirname, 'sci.config.json')))
 } 
 catch (ex){
     log('Cannot parse settings file: ' + ex)
