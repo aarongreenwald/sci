@@ -22,7 +22,7 @@ const requestListener = (request, response) => {
         if (config.verboseResponses) {
             response.write(ex.message || ex || 'An unknown error occurred')
         } else {
-            response.write('That didn\'t work. Try again.')
+            response.write(`That didn't work. Try again.`)
         }
         log(ex.message || ex || 'An unknown error occurred.')
     };
@@ -36,16 +36,7 @@ const requestListener = (request, response) => {
 
             const payload = getPayload(body)
             const eventType = getEventType(request);
-
-            let message = '';
-            switch (eventType) {
-                case 'push':
-                    message = processPushEvent(payload)
-                    break
-                case 'package':
-                    message = processPackageEvent(payload)
-                    break
-            }
+            const message = processEvent(eventType, payload);
 
             response.writeHead(200, {"Content-Type": "text/plain"})
             response.write(message)
@@ -84,13 +75,26 @@ function getEventType(request) {
     return request.headers['x-github-event'];
 }
 
+function spawnProcess({script, scriptDirectory}) {
+    spawn('sh', [script], {
+        cwd: scriptDirectory,
+        stdio: [process.stdin, process.stdout, process.stderr]
+    })
+}
+
+function processEvent(eventType, payload) {
+    if (eventType === 'push') {
+        return processPushEvent(payload)
+    } else if (eventType === 'package') {
+        return processPackageEvent(payload)
+    }
+}
+
 function processPushEvent(payload) {
     const repository = repositories.find(r => r.name === payload.repository.full_name)
     if (repository) {
-        spawn('sh', [ repository.script ], {
-            cwd: repository.scriptDirectory
-        })
-        const message = `Successfully processed continuous integration script for repository: ${repository.name}`;
+        spawnProcess(repository);
+        const message = `Triggering continuous integration script for repository: ${repository.name}`;
         log(message)
         return message;
     } else {
@@ -101,10 +105,8 @@ function processPushEvent(payload) {
 function processPackageEvent(payload) {
     const package = packages.find(r => r.name === payload.package.name)
     if (package) {
-        spawn('sh', [ package.script ], {
-            cwd: package.scriptDirectory
-        })
-        const message = `Successfully processed continuous integration script for package: ${package.name}`;
+        spawn(package)
+        const message = `Triggering continuous integration script for package: ${package.name}`;
         log(message)
         return message;
     } else {
