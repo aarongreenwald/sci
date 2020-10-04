@@ -43,7 +43,7 @@ const requestListener = (request, response) => {
                     message = processPushEvent(payload)
                     break
                 case 'package':
-                    message = processPackageEvent()
+                    message = processPackageEvent(payload)
                     break
             }
 
