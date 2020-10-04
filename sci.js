@@ -55,7 +55,7 @@ const requestListener = (request, response) => {
     
     request.on('end', () => {
         try {
-            validateRequest(request)
+            validateRequest(request, body)
 
             const payload = getPayload(body)
 
@@ -100,7 +100,7 @@ function getPayload(body) {
     }
 }
 
-function validateRequest(request) {
+function validateRequest(request, body) {
     const userAgent = request.headers['user-agent'];
     if (!userAgent.startsWith('GitHub-Hookshot/')){
         throw 'This request does not appear to originate from github. If you\'re going to try to break the system, at least try harder.'
