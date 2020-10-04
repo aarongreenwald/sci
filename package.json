@@ -20,5 +20,8 @@
   "license": "MIT License",
   "bugs": {
     "url": "https://github.com/aarongreenwald/sci/issues"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0"
   }
 }

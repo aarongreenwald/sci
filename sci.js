@@ -1,48 +1,25 @@
 const fs = require('fs');
 const http = require('http');
-const https = require('https');
 const spawn = require('child_process').spawn;
 const path = require('path');
 const crypto = require('crypto');
-
-/*
- * settings.json looks something like this: 
-{
-    "verboseResponses" : "true",
-	"ssl" : "true",
-	"sslOptions" : {},
-    "repositories": [
-        {   
-            "name": "aarongreenwald/grouper", 
-            "scriptDirectory": "sci/scripts/", 
-            "script": "grouper.sh"
-        },
-        {   
-            "name": "aarongreenwald/sci", 
-            "scriptDirectory": "sci/scripts/", 
-            "script": "sci.sh"
-        }
-    ],
-    "port" : 31242
+if (process.env.DOTENV) {
+    require('dotenv').config({path: process.env.DOTENV})
 }
-* 
-* port will default to 31242 if ommitted
-* verboseSettings will default to false if ommitted
- */
 
 log('sci server starting...')
 
-const settings = loadSettings()
+const config = loadConfig()
 
-const {repositories} = settings
-const port = settings.port || 31242
+const {repositories} = config
+const port = config.port || 31242
 const secret = process.env.SECRET
 
 const requestListener = (request, response) => {
 
     const handleError = (ex, response) => {
         response.writeHead(500, {"Content-Type": "text/plain"})
-        if (settings.verboseResponses) {
+        if (config.verboseResponses) {
             response.write(ex.message || ex || 'An unknown error occurred')
         } else {
             response.write('That didn\'t work. Try again.')
@@ -80,12 +57,13 @@ const requestListener = (request, response) => {
     })            
 }
 
-function loadSettings() {
+function loadConfig() {
     try {
-        return JSON.parse(fs.readFileSync(path.join(__dirname, 'sci.config.json')))
+        const configFile = process.env.SCI_CONFIG_PATH ||path.join(__dirname, 'sci.config.json');
+        return JSON.parse(fs.readFileSync(configFile))
     }
     catch (ex){
-        log(`Cannot parse settings file: ${ex}`)
+        log(`Cannot parse config file: ${ex}`)
         throw ex
     }
 }
@@ -103,7 +81,7 @@ function getPayload(body) {
 function validateRequest(request, body) {
     const userAgent = request.headers['user-agent'];
     if (!userAgent.startsWith('GitHub-Hookshot/')){
-        throw 'This request does not appear to originate from github. If you\'re going to try to break the system, at least try harder.'
+        throw 'Only requests originating from GitHub are valid.'
     }
 
     const key = 'sha1=' + crypto.createHmac('sha1', secret).update(body).digest('hex')
@@ -129,9 +107,4 @@ function log(message){
 }
 
 log(`Listening for POST requests on port ${port}...`)
-
-if (!settings.ssl){
-	http.createServer(requestListener).listen(port)
-} else {	
-	https.createServer(settings.sslOptions || { }, requestListener).listen(port)
-}
+http.createServer(requestListener).listen(port)

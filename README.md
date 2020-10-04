@@ -5,12 +5,17 @@ SCI - a simple continuous integration tool - listens for HTTP posts from github 
 
 Configuration
 ---------------
-You'll need a settings.json file that looks something like this: 
+sci reads environment variables:
+
+* `DOTENV`: optional, if available it should be the path to a .env file that sci will read
+* `SECRET`
+* `SCI_CONFIG_PATH`: optional, if not available sci will look for the config file in `./sci.config.json`
+
+Config file: 
 
 ```
 {
-    "verboseResponses" : "true",
-    "secretKey" : "sha1=somelonghashstringthatrepresentsyoursecretkey", 
+    "verboseResponses" : "true",    
     "repositories": [
         {   
             "name": "aarongreenwald/grouper", 
