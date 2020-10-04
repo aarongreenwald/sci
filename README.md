@@ -28,6 +28,13 @@ Config file:
             "script": "sci.sh"
         }
     ],
+    "packages": [
+        {
+          "name": "@aarongreenwald/pim-web",
+          "scriptDirectory": "/home/web/scripts/pim-web",
+          "script": "pim-web.sh"
+        }
+    ],
     "port" : 31242
 }
 ```

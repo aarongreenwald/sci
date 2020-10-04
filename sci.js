@@ -11,7 +11,7 @@ log('sci server starting...')
 
 const config = loadConfig()
 
-const {repositories} = config
+const {repositories, packages} = config
 const port = config.port || 31242
 const secret = process.env.SECRET
 
@@ -35,19 +35,21 @@ const requestListener = (request, response) => {
             validateRequest(request, body)
 
             const payload = getPayload(body)
+            const eventType = getEventType(request);
 
-            const repository = repositories.find(r => r.name === payload.repository.full_name)
-            if (repository) {
-                spawn('sh', [ repository.script ], {
-                    cwd: repository.scriptDirectory
-                })
-                response.writeHead(200, {"Content-Type": "text/plain"})
-                const message = `Successfully processed continuous integration script for repository: ${repository.name}`;
-                response.write(message)
-                log(message)
-            } else {
-                throw 'Invalid repository name.'                        
-            }                 
+            let message = '';
+            switch (eventType) {
+                case 'push':
+                    message = processPushEvent(payload)
+                    break
+                case 'package':
+                    message = processPackageEvent()
+                    break
+            }
+
+            response.writeHead(200, {"Content-Type": "text/plain"})
+            response.write(message)
+
         } catch (ex) {                                        
             handleError(ex, response)                    
         }                     
@@ -78,6 +80,38 @@ function getPayload(body) {
     }
 }
 
+function getEventType(request) {
+    return request.headers['x-github-event'];
+}
+
+function processPushEvent(payload) {
+    const repository = repositories.find(r => r.name === payload.repository.full_name)
+    if (repository) {
+        spawn('sh', [ repository.script ], {
+            cwd: repository.scriptDirectory
+        })
+        const message = `Successfully processed continuous integration script for repository: ${repository.name}`;
+        log(message)
+        return message;
+    } else {
+        throw 'Invalid repository name.'
+    }
+}
+
+function processPackageEvent(payload) {
+    const package = packages.find(r => r.name === payload.package.name)
+    if (package) {
+        spawn('sh', [ package.script ], {
+            cwd: package.scriptDirectory
+        })
+        const message = `Successfully processed continuous integration script for package: ${package.name}`;
+        log(message)
+        return message;
+    } else {
+        throw 'Invalid package name.'
+    }
+}
+
 function validateRequest(request, body) {
     const userAgent = request.headers['user-agent'];
     if (!userAgent.startsWith('GitHub-Hookshot/')){
@@ -95,8 +129,9 @@ function validateRequest(request, body) {
         throw 'Only POST requests are processed by this server.'
     }
 
-    if (request.headers['x-github-event'] !== 'push'){
-        throw 'Only push events are processed by this server.'
+    const event = getEventType(request);
+    if (!['push', 'package'].includes(event)){
+        throw 'Invalid event type (only push/package are valid).'
     }
 }
 
