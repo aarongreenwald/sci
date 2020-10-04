@@ -30,8 +30,8 @@ Config file:
     ],
     "packages": [
         {
-          "name": "@aarongreenwald/pim-web",
-          "scriptDirectory": "/home/web/scripts/pim-web",
+          "name": "pim-web",
+          "scriptDirectory": "sci/pim-web",
           "script": "pim-web.sh"
         }
     ],
