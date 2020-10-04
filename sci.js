@@ -1,11 +1,11 @@
-var fs = require('fs')
-var http = require("http")
-var https = require("https")
-var spawn = require('child_process').spawn
-var path = require('path')
-var crypto = require('crypto')
+const fs = require('fs');
+const http = require("http");
+const https = require("https");
+const spawn = require('child_process').spawn;
+const path = require('path');
+const crypto = require('crypto');
 
-var log = function(message){	
+const log = function(message){
     console.log('---------', new Date(), '---------')
     console.log(message)
     console.log()
@@ -48,30 +48,29 @@ catch (ex){
     throw ex
 }
 
-var repositories = settings.repositories
-var port = settings.port || 31242
+const repositories = settings.repositories
+const port = settings.port || 31242
 
-var requestListener = function(request, response) {  
-    
-    var handleError = function(ex, response){
+const requestListener = (request, response) => {
+
+    const handleError = function (ex, response) {
         response.writeHead(500, {"Content-Type": "text/plain"})
-        if (settings.verboseResponses){
-            response.write(ex.message || ex ||  'An uknown error occurred')    
+        if (settings.verboseResponses) {
+            response.write(ex.message || ex || 'An unknown error occurred')
+        } else {
+            response.write('That didn\'t work. Try again.')
         }
-        else {        
-            response.write('That didn\'t work. Try again.')        
-        }    
         log(ex.message || ex || 'An unknown error occurred.') //TODO I should log more than this
-    }
+    };
 
-              
-    var body = ''                                
-    request.on('data', function (data) {
+
+    let body = '';
+    request.on('data', data => {
         body += data                                                  
     })
     
-    request.on('end', function () {
-        try {                                     
+    request.on('end', () => {
+        try {
             if (request.headers['user-agent'].indexOf('GitHub-Hookshot/') === -1){
                 throw 'This request does not appear to originate from github. If you\'re going to try to break the system, at least try harder.'            
             }
@@ -91,20 +90,20 @@ var requestListener = function(request, response) {
                 throw 'Only push events are processed by this server.'
             }
             
-            try {           
-                var payload = JSON.parse(body)                              
-            } catch (ex) {                        
+            try {
+                var payload = JSON.parse(body)
+            } catch (ex) {
                 throw   { 
                             message: 'Unable to parse payload: ' 
                                     + body 
                                     + '\n\nError: ' + ex
                         }
             }
-            
-            var found = false
-            for (var i = 0; i < repositories.length; i++){
-                var repository = repositories[i]
-                if (payload.repository.full_name === repository.name){                    
+
+            let found = false;
+            for (let i = 0; i < repositories.length; i++){
+                const repository = repositories[i]
+                if (payload.repository.full_name === repository.name){
                     spawn('sh', [ repository.script ], { 
                         cwd: repository.scriptDirectory
                     })                                      
@@ -114,7 +113,7 @@ var requestListener = function(request, response) {
             }
             if (found){
                 response.writeHead(200, {"Content-Type": "text/plain"})
-                var message = 'Successfully processed continuous integration script for repository: ' + repository.name
+                const message = 'Successfully processed continuous integration script for repository: ' + repository.name;
                 response.write(message) 
                 log(message) //log more than this
             }
