@@ -24,7 +24,7 @@ const requestListener = (request, response) => {
         } else {
             response.write(`That didn't work. Try again.`)
         }
-        log(ex.message || ex || 'An unknown error occurred.')
+        logError(ex.message || ex || 'An unknown error occurred.')
     };
 
     let body = '';
@@ -56,7 +56,7 @@ function loadConfig() {
         return JSON.parse(fs.readFileSync(configFile))
     }
     catch (ex){
-        log(`Cannot parse config file: ${ex}`)
+        logError(`Cannot parse config file: ${ex}`)
         throw ex
     }
 }
@@ -105,7 +105,7 @@ function processPushEvent(payload) {
 function processPackageEvent(payload) {
     const package = packages.find(r => r.name === payload.package.name)
     if (package) {
-        spawn(package)
+        spawnProcess(package)
         const message = `Triggering continuous integration script for package: ${package.name}`;
         log(message)
         return message;
@@ -135,6 +135,12 @@ function validateRequest(request, body) {
     if (!['push', 'package'].includes(event)){
         throw 'Invalid event type (only push/package are valid).'
     }
+}
+
+function logError(message) {
+    console.error('---------', new Date(), '---------')
+    console.error(message)
+    console.error()
 }
 
 function log(message){
