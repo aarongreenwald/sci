@@ -92,13 +92,16 @@ function processEvent(eventType, payload) {
 
 function processPushEvent(payload) {
     const repository = repositories.find(r => r.name === payload.repository.full_name)
-    if (repository) {
-        spawnProcess(repository);
+    const isDefaultBranch = payload.ref === `refs/heads/${payload.repository.master_branch}`
+    if (!repository) {
+        throw 'Invalid repository name.'
+    } else if (!isDefaultBranch) {
+        throw `Branch ${payload.ref} is not the default branch for this repository. Default branch is ${payload.repository.master_branch}`
+    } else {
         const message = `Triggering continuous integration script for repository: ${repository.name}`;
         log(message)
+        spawnProcess(repository);
         return message;
-    } else {
-        throw 'Invalid repository name.'
     }
 }
 
@@ -117,7 +120,7 @@ function processPackageEvent(payload) {
 function validateRequest(request, body) {
     const userAgent = request.headers['user-agent'];
     if (!userAgent.startsWith('GitHub-Hookshot/')){
-        throw 'Only requests originating from GitHub are valid.'
+        throw `Only requests originating from GitHub are valid. User-Agent is: ${userAgent}`
     }
 
     const key = 'sha1=' + crypto.createHmac('sha1', secret).update(body).digest('hex')
